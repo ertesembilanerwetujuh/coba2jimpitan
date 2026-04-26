@@ -1,0 +1,596 @@
+
+/* ================= GLOBAL ================= */
+:root {
+  --side-padding: 16px;
+  --safe-width: min(100%, 390px);
+}
+
+* {
+  font-family: 'Roboto', sans-serif;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: #111;
+
+    display: flex;
+  justify-content: center;
+
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+
+html, body {
+  height: 100dvh;
+}
+
+
+/* ================= WRAPPER ================= */
+.input-page {
+  width: var(--safe-width);
+  height: 100dvh;
+  margin: 0 auto;
+  background: #fff;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ================= TOPBAR ================= */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  background: #fff;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 4px var(--side-padding) 0px;
+}
+
+/* 🔥 TAMBAH GROUP KANAN */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* jarak scan & filter */
+}
+
+.brand {
+  font-size: 32px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+}
+
+.icon-button {
+  padding: 4px;
+  background: none;
+  border: none;
+}
+
+.icon-button img {
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+
+/* ================= FILTER BADGE ================= */
+.filter-badge {
+  display: none;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px; /* 🔥 lebih lega */
+  font-size: 18px;
+  border-radius: 999px;
+
+  background: #e8fff0;
+  color: #16a34a;
+
+  border: none;
+
+  margin-right: 2px; /* 🔥 kasih napas kanan */
+}
+
+.filter-badge.show {
+  display: inline-flex;
+}
+
+.filter-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+  position: fixed;
+
+  /* 🔥 TURUN DARI TOPBAR */
+  top: 72px;
+
+  /* 🔥 tetap mengikuti container center (bukan nempel kanan layar) */
+  right: calc(50% - 195px + 8px);
+
+  min-width: 190px; /* 🔥 lebih lebar dari sebelumnya */
+  background: #fff;
+  z-index: 999;
+
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+
+  transition: 0.2s ease;
+}
+
+.sidebar.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar-content {
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 6px 10px;
+}
+
+.sidebar-item {
+  padding: 10px 12px;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 🔥 INI KUNCINYA */
+}
+
+.sidebar-item:hover {
+  background: #f3f3f3;
+}
+
+/* ================= OVERLAY ================= */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.12); /* 🔥 lebih soft */
+
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.2s ease;
+  z-index: 998;
+}
+
+.overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+.search-box {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* INPUT */
+.search-box input {
+  width: 100%;
+  height: 50px;
+
+  border-radius: 50px;
+  border: none;
+  background: #f3f4f6;
+
+  padding: 0 52px; /* FIX: lebih lega */
+
+  font-size: 16px;
+  outline: none;
+}
+
+/* ICON KIRI */
+.icon-left {
+  position: absolute;
+  left: 18px; /* FIX lebih masuk */
+
+  width: 28px;
+  height: 28px;
+
+  opacity: 0.7;
+}
+
+.icon-right {
+  position: absolute;
+  right: 18px; /* FIX lebih masuk */
+
+  width: 28px;
+  height: 28px;
+
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+/* ================= SEARCH ================= */
+.search-form {
+
+  position: sticky;
+  top: 0;
+  z-index: 40;
+
+  background: #fff;
+  padding: 0px var(--side-padding) 6px;
+}
+
+
+
+/* ================= LIST ================= */
+#listWarga {
+  flex: 1;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 10px var(--side-padding) 120px;
+}
+
+/* ================= ITEM ================= */
+.wa-item {
+  padding: 12px 0;
+}
+
+.wa-row {
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  align-items: center;
+
+  column-gap: 10px;
+  padding-right: 4px; /* 🔥 FIX biar gak nempel kanan */
+}
+
+/* LEFT */
+.wa-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.kode {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.nama {
+  font-size: 16px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* RIGHT */
+.wa-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.total {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.status {
+  font-size: 16px;
+  color: #999;
+}
+
+/* ================= FOCUS ================= */
+.wa-item.dim {
+  opacity: 0.25;
+  filter: blur(0.3px);
+  transform: scale(0.98);
+  transition: 0.2s ease;
+}
+
+.wa-item.focus {
+  opacity: 1;
+  transform: scale(1.02);
+}
+
+
+
+/* ================= DETAIL PAGE WRAPPER ================= */
+#detailPage {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 999;
+
+  display: flex;
+  justify-content: center;
+
+  transform: translateX(100%);
+  transition: 0.25s ease;
+
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+#detailPage.open {
+  transform: translateX(0);
+}
+
+/* ================= INNER ================= */
+.detail-content {
+  width: min(100%, 390px);
+  height: 100dvh;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= HEADER (ARROW CENTER TOP) ================= */
+.detail-header {
+  position: relative;
+  padding: 24px 16px 10px; /* 🔥 tambah jarak bawah header */
+
+  display: flex;
+  justify-content: center;  /* 🔥 center horizontal */
+  align-items: center;
+}
+
+/* arrow tetap kecil */
+.back-btn {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.back-btn img {
+  width: 32px;
+  height: 32px;
+}
+
+/* ================= BODY ================= */
+.detail-body {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 34px;
+  text-align: center;
+  gap: 18px;
+}
+
+/* ================= TEXT (NOMINAL FOCUS MAX) ================= */
+.detail-id-big {
+  font-size: clamp(56px, 10vw, 64px);
+  font-weight: 600;
+  color: #444;
+}
+
+.detail-nama-big {
+  font-size: clamp(28px, 7.5vw, 36px);
+  font-weight: 700;
+  color: #111;
+}
+
+/* 🔥 NOMINAL DIBESARIN PALING UTAMA */
+.detail-value {
+  font-size: clamp(92px, 20vw, 96px);
+  font-weight: 900;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+/* warna */
+#detailPage .detail-value.zero {
+  color: #dc2626;
+}
+
+#detailPage .detail-value.positive {
+  color: #186e30;
+}
+
+/* ================= NOTE ================= */
+.detail-note-title {
+  font-size: 16px;
+  color: #888;
+  margin-top: 10px;
+}
+
+.detail-note-desc {
+  font-size: 13px;
+  color: #aaa;
+}
+
+/* ================= COUNTER ================= */
+.counter {
+  display: flex;
+  gap: 34px;
+  margin-top: 30px;
+}
+
+.counter button {
+  width: 78px;
+  height: 78px;
+
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+
+  font-size: 32px;
+  font-weight: 700;
+}
+
+/* ================= SAVE ================= */
+.save {
+  margin-top: 36px;
+
+  width: 82%;
+  height: 66px;
+
+  border-radius: 999px;
+  border: none;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+
+/* ================= BOTTOM NAV (FIX CENTER RATA) ================= */
+/* ================= BOTTOM NAV (NO BORDER / CLEAN) ================= */
+.bottom-nav {
+  position: fixed;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: min(100%, 390px);
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  padding: 16px 6px;
+  background: #fff;
+
+  border-top: none; /* 🔥 INI YANG HILANGIN GARIS */
+}
+
+/* 🔥 FIX UTAMA DI SINI */
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+font-weight: 600;
+  text-align: center;
+  font-size: 14px;
+  color: #000000;
+  text-decoration: none;
+}
+
+.nav-item {
+  position: relative;
+  z-index: 1;
+}
+
+.nav-item.is-active {
+  color: #111;
+  font-weight: 600;
+}
+
+/* pill background */
+.nav-item.is-active::before {
+  content: "";
+  position: absolute;
+
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 85%;
+  height: 42px;
+
+  background: #f2f2f2;
+  border-radius: 999px;
+
+  z-index: 0;
+}
+
+.nav-item img,
+.nav-item {
+  position: relative;
+  z-index: 2;
+}
+
+.nav-item.is-active::before {
+  transition: all 0.2s ease;
+}
+
+
+
+.nav-item img {
+  width: 32px;
+  height: 32px;
+    display: block;
+  margin: 0 auto;
+  filter: brightness(0); /* 🔥 paksa jadi hitam */
+}
+
+.nav-item.is-active {
+  color: #000000;
+  font-weight: 600;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+
+  background: rgba(20,20,20,0.92);
+  color: #fff;
+
+  padding: 10px 14px;
+  border-radius: 50px;
+
+  font-size: 13px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s ease;
+  z-index: 9999;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+@media (max-height: 700px) {
+}
+
