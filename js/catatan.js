@@ -17,6 +17,7 @@ const state = {
   filter: "all",
   active: null,
   lastScrollId: null,
+  lastUpdatedId: null, // ⬅️ baru
 };
 
 // ================= DOM =================
@@ -74,17 +75,30 @@ function getTanggal() {
 
 const clearBtn = document.getElementById("clearSearch");
 
+// kontrol animasi tombol X
+function updateClearButton() {
+  if (el.search.value) {
+    clearBtn.classList.add("show");
+  } else {
+    clearBtn.classList.remove("show");
+  }
+}
+
+// klik X
 clearBtn.onclick = () => {
   el.search.value = "";
   render();
+  updateClearButton();
 };
 
+// input ketik
 el.search.addEventListener("input", () => {
   render();
-
-  clearBtn.style.display = el.search.value ? "block" : "none";
+  updateClearButton();
 });
 
+// awal load
+updateClearButton();
 
 
 // ================= ICON =================
@@ -183,6 +197,9 @@ function openDetail(w) {
   updateDetailColor(value);
 
   el.detailPage.classList.add("open");
+
+  // 🔥 TAMBAHAN: push history biar tombol back HP bisa dipakai
+  history.pushState({ page: "detail" }, "");
 }
 
 function updateDetailColor(value) {
@@ -225,6 +242,15 @@ function render() {
 
   list = filterData(list);
 
+  // 🔥 PRIORITAS: yang terakhir diinput naik ke atas
+  if (state.lastUpdatedId) {
+    list.sort((a, b) => {
+      if (a.id === state.lastUpdatedId) return -1;
+      if (b.id === state.lastUpdatedId) return 1;
+      return 0;
+    });
+  }
+
   el.list.innerHTML = "";
   list.forEach(drawItem);
 }
@@ -256,6 +282,18 @@ function drawItem(w) {
       </div>
     </div>
   `;
+
+  // 🔥 BOUNCE ICON (item terakhir diupdate)
+  if (w.id === state.lastUpdatedId) {
+    setTimeout(() => {
+      const icon = div.querySelector(".icon");
+      icon?.classList.add("bounce");
+
+      setTimeout(() => {
+        icon?.classList.remove("bounce");
+      }, 400);
+    }, 50);
+  }
 
   div.addEventListener("click", () => {
     state.lastScrollId = w.id;
@@ -307,14 +345,26 @@ el.save.onclick = async () => {
   state.input[w.id] = 0;
 
   await loadHarian();
+
+  // 🔥 reset search
+  el.search.value = "";
+  updateClearButton();
+
+  // 🔥 tandai item terakhir
+  state.lastUpdatedId = w.id;
+
   render();
   updateFilterUI();
 
   closeDetail();
+
+  // 🔥 reset setelah animasi selesai
+  setTimeout(() => {
+    state.lastUpdatedId = null;
+  }, 500);
 };
 
 // ================= BACK =================
-el.back.onclick = closeDetail;
 
 // ================= SIDEBAR =================
 el.btnMenu.onclick = (e) => {
@@ -329,6 +379,43 @@ document.addEventListener("click", (e) => {
     el.overlay.classList.remove("show");
   }
 });
+
+
+
+// ================= PLACEHOLDER TYPING =================
+function startTypingPlaceholder() {
+  const text = "Cari nama warga...";
+  let index = 0;
+  let typingInterval;
+  let repeatTimeout;
+
+  function type() {
+    typingInterval = setInterval(() => {
+      // kalau user sudah mulai ngetik → stop
+      if (el.search.value) {
+        clearInterval(typingInterval);
+        clearTimeout(repeatTimeout);
+        return;
+      }
+
+      el.search.setAttribute("placeholder", text.slice(0, index + 1));
+      index++;
+
+      if (index === text.length) {
+        clearInterval(typingInterval);
+
+        // tunggu 5 detik lalu ulang lagi
+        repeatTimeout = setTimeout(() => {
+          index = 0;
+          type();
+        }, 5000);
+      }
+    }, 80); // kecepatan ketik
+  }
+
+  type();
+}
+
 
 // ================= FILTER =================
 document.querySelectorAll(".sidebar-item").forEach(item => {
@@ -358,6 +445,14 @@ async function init() {
   await loadHarian();
   render();
   updateFilterUI();
+  startTypingPlaceholder(); // ⬅️ tambahkan ini
 }
 
 init();
+
+// ================= HANDLE BACK BUTTON HP =================
+window.addEventListener("popstate", () => {
+  if (el.detailPage.classList.contains("open")) {
+    closeDetail();
+  }
+});
